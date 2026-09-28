@@ -20,6 +20,9 @@ telemetry packets GpsDeploymentPackets {
     ComCcsds.commsBufferManager.TotalBuffs
     ComCcsds.commsBufferManager.CurrBuffs
     ComCcsds.commsBufferManager.HiBuffs
+    Gps.gpsBufferManager.TotalBuffs
+    Gps.gpsBufferManager.CurrBuffs
+    Gps.gpsBufferManager.HiBuffs
 
     Gps.rateGroup_1Hz.RgMaxTime
     Gps.rateGroup_0_5Hz.RgMaxTime
@@ -36,10 +39,19 @@ telemetry packets GpsDeploymentPackets {
     Gps.cmdSeq.CS_Errors
     ComCcsds.commsBufferManager.NoBuffs
     ComCcsds.commsBufferManager.EmptyBuffs
+    Gps.gpsBufferManager.NoBuffs
+    Gps.gpsBufferManager.EmptyBuffs
 
     Gps.rateGroup_1Hz.RgCycleSlips
     Gps.rateGroup_0_5Hz.RgCycleSlips
     Gps.rateGroup_0_25Hz.RgCycleSlips
+  }
+
+  packet GpsInfo id 3 group 1 {
+    Gps.gps.UTCTime
+    Gps.gps.Latitude
+    Gps.gps.Longitude
+    Gps.gps.Altitude
   }
 
   packet SystemRes1 id 5 group 2 {
@@ -163,4 +175,10 @@ telemetry packets GpsDeploymentPackets {
 
 } omit {
   CdhCore.cmdDisp.CommandErrors
+  CdhCore.events.EventsDropped
+  FileHandling.fileUplink.FilesReceivedFailed
+  DataProducts.dpBufferAccumulator.BA_NumQueuedBuffers
+  Gps.cmdSeq.CS_CurrentSequence
+  Gps.serialDriver.BytesSent
+  Gps.serialDriver.BytesRecv
 }

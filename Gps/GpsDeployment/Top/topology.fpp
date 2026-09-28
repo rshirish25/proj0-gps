@@ -52,7 +52,7 @@ module Gps {
   # Telemetry packets (only used when TlmPacketizer is used)
   # ----------------------------------------------------------------------
 
-    # include "GpsDeploymentPackets.fppi"
+    include "GpsDeploymentPackets.fppi"
 
   # ----------------------------------------------------------------------
   # Direct graph specifiers
