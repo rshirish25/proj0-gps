@@ -17,10 +17,18 @@ GpsComponent ::GpsComponent(const char* const compName) : GpsComponentComponentB
 GpsComponent ::~GpsComponent() {}
 
 // ----------------------------------------------------------------------
+// Handler implementations for typed input ports
+// ----------------------------------------------------------------------
+
+void GpsComponent ::UartRead_handler(FwIndexType portNum, Fw::Buffer& buffer, const Drv::ByteStreamStatus& status) {
+    // TODO
+}
+
+// ----------------------------------------------------------------------
 // Handler implementations for commands
 // ----------------------------------------------------------------------
 
-void GpsComponent ::TODO_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
+void GpsComponent ::GET_UTC_TIME_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
     // TODO
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }

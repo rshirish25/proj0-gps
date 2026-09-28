@@ -1,45 +1,43 @@
 module Components {
+
     @ UART GPS receiver and parser
     active component GpsComponent {
 
-        # One async command/port is required for active components
-        # This should be overridden by the developers with a useful command/port
-        @ TODO
-        async command TODO opcode 0
+        @ Receive GPS data from the UART driver
+        sync input port UartRead: Drv.ByteStreamData
 
-        ##############################################################################
-        #### Uncomment the following examples to start customizing your component ####
-        ##############################################################################
+        @ Return processed UART buffers
+        output port deallocate: Fw.BufferSend
 
-        # @ Example async command
-        # async command COMMAND_NAME(param_name: U32)
+        @ Report the most recently received UTC time
+        async command GET_UTC_TIME opcode 0
 
-        # @ Example telemetry counter
-        # telemetry ExampleCounter: U64
+        @ GPS telemetry
+        telemetry UTCTime: string size 32
+        telemetry Latitude: F64
+        telemetry Longitude: F64
+        telemetry Altitude: F64
 
-        # @ Example event
-        # event ExampleStateEvent(example_state: Fw.On) severity activity high id 0 format "State set to {}"
+        @ Report that the GPS does not have a position lock
+        event GpsNoLock \
+            severity warning high \
+            format "GPS does not have a lock"
 
-        # @ Example port: receiving calls from the rate group
-        # sync input port run: Svc.Sched
+        @ Report a malformed GPS message
+        event ParseError(sentence: string size 128) \
+            severity warning low \
+            format "Error parsing GPS string: {}"
 
-        # @ Example parameter
-        # param PARAMETER_NAME: U32
+        @ Report the current GPS UTC time
+        event CurrentUtcTime(utcTime: string size 32) \
+            severity activity high \
+            format "Current UTC time: {}"
 
-        ###############################################################################
-        # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
-        ###############################################################################
-        @ Port for requesting the current time
+        @ Port for requesting the current F Prime time
         time get port timeCaller
 
-        @ Enables command handling
         import Fw.Command
-
-        @ Enables event handling
         import Fw.Event
-
-        @ Enables telemetry channels handling
         import Fw.Channel
-
     }
 }

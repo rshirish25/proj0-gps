@@ -26,15 +26,27 @@ class GpsComponent final : public GpsComponentComponentBase {
 
   private:
     // ----------------------------------------------------------------------
+    // Handler implementations for typed input ports
+    // ----------------------------------------------------------------------
+
+    //! Handler implementation for UartRead
+    //!
+    //! Receive GPS data from the UART driver
+    void UartRead_handler(FwIndexType portNum,  //!< The port number
+                          Fw::Buffer& buffer,
+                          const Drv::ByteStreamStatus& status) override;
+
+  private:
+    // ----------------------------------------------------------------------
     // Handler implementations for commands
     // ----------------------------------------------------------------------
 
-    //! Handler implementation for command TODO
+    //! Handler implementation for command GET_UTC_TIME
     //!
-    //! TODO
-    void TODO_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                         U32 cmdSeq            //!< The command sequence number
-                         ) override;
+    //! Report the most recently received UTC time
+    void GET_UTC_TIME_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                 U32 cmdSeq            //!< The command sequence number
+                                 ) override;
 };
 
 }  // namespace Components
