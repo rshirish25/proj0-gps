@@ -7,46 +7,39 @@
 #ifndef Components_GpsComponent_HPP
 #define Components_GpsComponent_HPP
 
+#include "Fw/Types/String.hpp"
 #include "Gps/Components/GpsComponent/GpsComponentComponentAc.hpp"
 
 namespace Components {
 
 class GpsComponent final : public GpsComponentComponentBase {
   public:
-    // ----------------------------------------------------------------------
-    // Component construction and destruction
-    // ----------------------------------------------------------------------
-
-    //! Construct GpsComponent object
-    GpsComponent(const char* const compName  //!< The component name
-    );
-
-    //! Destroy GpsComponent object
+    GpsComponent(const char* const compName);
     ~GpsComponent();
 
   private:
-    // ----------------------------------------------------------------------
-    // Handler implementations for typed input ports
-    // ----------------------------------------------------------------------
-
-    //! Handler implementation for UartRead
-    //!
-    //! Receive GPS data from the UART driver
-    void UartRead_handler(FwIndexType portNum,  //!< The port number
+    // Handle data received from the UART driver
+    void UartRead_handler(FwIndexType portNum,
                           Fw::Buffer& buffer,
                           const Drv::ByteStreamStatus& status) override;
 
-  private:
-    // ----------------------------------------------------------------------
-    // Handler implementations for commands
-    // ----------------------------------------------------------------------
+    // Report the most recently received GPS UTC time
+    void GET_UTC_TIME_cmdHandler(FwOpcodeType opCode,
+                                 U32 cmdSeq) override;
 
-    //! Handler implementation for command GET_UTC_TIME
-    //!
-    //! Report the most recently received UTC time
-    void GET_UTC_TIME_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                 U32 cmdSeq            //!< The command sequence number
-                                 ) override;
+    // GPS parsing helpers
+    void processByte(char byte);
+    void processSentence();
+    bool parseCoordinate(const char* value,
+                         char direction,
+                         F64& coordinate) const;
+    void reportParseError(const char* message);
+
+    static constexpr U32 NMEA_BUFFER_SIZE = 128;
+
+    char m_sentenceBuffer[NMEA_BUFFER_SIZE] = {};
+    U32 m_sentenceLength = 0;
+    Fw::String m_utcTime{"No GPS time received"};
 };
 
 }  // namespace Components
