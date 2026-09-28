@@ -49,6 +49,11 @@ module Gps {
     stack size Default.STACK_SIZE \
     priority 40
 
+  instance gps: Components.GpsComponent base id 0x10005000 \
+    queue size Default.QUEUE_SIZE \
+    stack size Default.STACK_SIZE \
+    priority 39
+
   # ----------------------------------------------------------------------
   # Queued component instances
   # ----------------------------------------------------------------------
@@ -67,5 +72,9 @@ module Gps {
   instance timer: Svc.LinuxTimer base id 0x10013000
 
   instance comDriver: Drv.TcpClient base id 0x10014000
+
+  instance serialDriver: Drv.LinuxUartDriver base id 0x10015000
+
+  instance gpsBufferManager: Svc.BufferManager base id 0x10016000
 
 }

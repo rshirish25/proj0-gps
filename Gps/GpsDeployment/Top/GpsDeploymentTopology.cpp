@@ -9,6 +9,7 @@
 //#include <Gps/GpsDeployment/Top/GpsDeploymentPacketsAc.hpp>
 
 // Necessary project-specified types
+#include <Fw/Logger/Logger.hpp>
 #include <Fw/Types/MallocAllocator.hpp>
 
 // Public functions for use in main program are namespaced with deployment module Gps
@@ -17,6 +18,12 @@ namespace Gps {
 
 // Instantiate a malloc allocator for cmdSeq buffer allocation
 Fw::MallocAllocator mallocator;
+
+// GPS UART configuration
+constexpr FwSizeType GPS_BUFFER_SIZE = 32 * 1024;
+constexpr U16 GPS_BUFFER_COUNT = 10;
+constexpr const char* GPS_UART_DEVICE = "/dev/ttyUSB0";
+bool uartOpened = false;
 
 // Rate group timing: base clock interval and divisors are coupled to rate group names
 const Fw::TimeInterval rateGroupInterval(1, 0);  // 1Hz base clock
@@ -30,6 +37,7 @@ Svc::ActiveRateGroup::ContextArray rateGroup_0_25HzContext(0);
 
 enum TopologyConstants {
     COMM_PRIORITY = 34,
+    UART_PRIORITY = 38,
 };
 
 /**
@@ -53,6 +61,23 @@ void configureTopology() {
 
     // PrmDb file name must be supplied by the using topology
     FileHandling::prmDb.configure("PrmDb.dat");
+
+    // Allocate buffers used to receive GPS data.
+    Svc::BufferManager::BufferBins gpsBufferBins{};
+    gpsBufferBins.bins[0].bufferSize = GPS_BUFFER_SIZE;
+    gpsBufferBins.bins[0].numBuffers = GPS_BUFFER_COUNT;
+    gpsBufferManager.setup(300, 0, mallocator, gpsBufferBins);
+
+    // Open the GPS UART connection.
+    uartOpened = serialDriver.open(GPS_UART_DEVICE, Drv::LinuxUartDriver::BAUD_9600,
+                                   Drv::LinuxUartDriver::NO_FLOW, Drv::LinuxUartDriver::PARITY_NONE,
+                                   GPS_BUFFER_SIZE);
+
+    if (uartOpened) {
+        Fw::Logger::log("[INFO] GPS UART opened successfully\n");
+    } else {
+        Fw::Logger::log("[ERROR] GPS UART failed to open\n");
+    }
 }
 
 void setupTopology(const TopologyState& state) {
@@ -77,6 +102,9 @@ void setupTopology(const TopologyState& state) {
     loadParameters();
     // Autocoded task kick-off (active components). Function provided by autocoder.
     startTasks(state);
+    if (uartOpened) {
+        serialDriver.start(UART_PRIORITY, Default::STACK_SIZE);
+    }
     // Initialize socket communication if and only if there is a valid specification
     if (state.hostname != nullptr && state.port != 0) {
         Os::TaskString name("ReceiveTask");
@@ -95,6 +123,13 @@ void stopRateGroups() {
 }
 
 void teardownTopology(const TopologyState& state) {
+    if (uartOpened) {
+        serialDriver.quitReadThread();
+        (void)serialDriver.join();
+    }
+
+    gpsBufferManager.cleanup();
+
     // Autocoded (active component) task clean-up. Functions provided by topology autocoder.
     stopTasks(state);
     freeThreads(state);

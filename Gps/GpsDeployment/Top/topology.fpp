@@ -32,6 +32,9 @@ module Gps {
     instance timer
     instance comDriver
     instance cmdSeq
+    instance gps
+    instance serialDriver
+    instance gpsBufferManager
 
   # ----------------------------------------------------------------------
   # Pattern graph specifiers
@@ -129,7 +132,14 @@ module Gps {
     }
 
     connections GpsDeployment {
+      # UART data flows from the driver to the GPS component
+      serialDriver.$recv -> gps.UartRead
 
+      # The GPS component returns processed buffers
+      gps.deallocate -> gpsBufferManager.bufferSendIn
+
+      # The UART driver requests receive buffers
+      serialDriver.allocate -> gpsBufferManager.bufferGetCallee
     }
 
   }
