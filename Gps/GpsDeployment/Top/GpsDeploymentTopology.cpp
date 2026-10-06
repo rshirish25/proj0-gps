@@ -22,7 +22,7 @@ Fw::MallocAllocator mallocator;
 // GPS UART configuration
 constexpr FwSizeType GPS_BUFFER_SIZE = 32 * 1024;
 constexpr U16 GPS_BUFFER_COUNT = 10;
-constexpr const char* GPS_UART_DEVICE = "/dev/ttyUSB0";
+constexpr const char* GPS_UART_DEVICE = "/dev/serial0";
 bool uartOpened = false;
 
 // Rate group timing: base clock interval and divisors are coupled to rate group names
@@ -69,7 +69,7 @@ void configureTopology() {
     gpsBufferManager.setup(300, 0, mallocator, gpsBufferBins);
 
     // Open the GPS UART connection.
-    uartOpened = serialDriver.open(GPS_UART_DEVICE, Drv::LinuxUartDriver::BAUD_9600,
+    uartOpened = serialDriver.open(GPS_UART_DEVICE, Drv::LinuxUartDriver::BAUD_38400,
                                    Drv::LinuxUartDriver::NO_FLOW, Drv::LinuxUartDriver::PARITY_NONE,
                                    GPS_BUFFER_SIZE);
 
