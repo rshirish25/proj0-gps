@@ -100,7 +100,7 @@ void GpsComponent::processSentence() {
         }
     }
 
-    if (fieldCount < 10 || fields[1][0] == '\0') {
+    if (fieldCount < 10) {
         this->reportParseError(this->m_sentenceBuffer);
         return;
     }
@@ -112,11 +112,19 @@ void GpsComponent::processSentence() {
         return;
     }
 
-    this->m_utcTime = fields[1];
-    this->tlmWrite_UTCTime(this->m_utcTime);
+    // Before the receiver has a fix, it may not have a UTC time yet.
+    if (fields[1][0] != '\0') {
+        this->m_utcTime = fields[1];
+        this->tlmWrite_UTCTime(this->m_utcTime);
+    }
 
     if (fixQuality == 0) {
         this->log_WARNING_HI_GpsNoLock();
+        return;
+    }
+
+    if (fields[1][0] == '\0') {
+        this->reportParseError(this->m_sentenceBuffer);
         return;
     }
 
